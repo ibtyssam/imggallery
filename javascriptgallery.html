@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Photo Gallery</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+
+        h1 {
+            margin-top: 20px;
+        }
+
+        #large-display {
+            width: 400px;
+            height: 300px;
+            margin: 20px auto;
+            border: 3px solid #ccc;
+            background-size: cover;
+            background-position: center;
+            background-color: #ddd;
+            transition: background-image 0.5s ease-in-out; /* Fade-in transition */
+        }
+
+        .gallery {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin: 20px auto;
+        }
+
+        .photo {
+            width: 200px;
+            height: 150px;
+            border: 2px solid #ccc;
+            cursor: pointer;
+        }
+
+        .photo:focus {
+            outline: 3px solid green;
+        }
+
+        button {
+            margin: 10px;
+            padding: 10px 15px;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            background-color: #007bff;
+            color: white;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body onload="initializeGallery()">
+    <h1>Interactive Photo Gallery</h1>
+    <div id="large-display" aria-live="polite" role="img" aria-label="Large photo display area."></div>
+    <div class="gallery">
+        <img id="photo1" class="photo" src="file:///C:/Users/windos%2010/Desktop/photogallery/fencer-s-victory-cheer-stockcake.webp" alt="Fencer in action" tabindex="0" onclick="showPhoto('photo1')" onerror="handleError(this)">
+        <img id="photo2" class="photo" src="file:///C:/Users/windos%2010/Desktop/photogallery/fencing-on-stage-u9ykbnkdeb5vkclq.jpg" alt="Fencing bout" tabindex="0" onclick="showPhoto('photo2')" onerror="handleError(this)">
+        <img id="photo3" class="photo" src="file:///C:/Users/windos%2010/Desktop/photogallery/istockphoto-172226343-612x612.jpg" alt="Fencing victory" tabindex="0" onclick="showPhoto('photo3')" onerror="handleError(this)">
+        <img id="photo4" class="photo" src="file:///C:/Users/windos%2010/Desktop/photogallery/istockphoto-1153729351-612x612.jpg" alt="Fencing practice" tabindex="0" onclick="showPhoto('photo4')" onerror="handleError(this)">
+        <img id="photo5" class="photo" src="file:///C:/Users/windos%2010/Desktop/photogallery/pojedynek.jpg" alt="Fencing gear" tabindex="0" onclick="showPhoto('photo5')" onerror="handleError(this)">
+        <img id="photo6" class="photo" src="file:///C:/Users/windos%2010/Desktop/photogallery/two-men-wearing-fencing-suit-practicing-with-sword-against-gray_155003-6296.avif" alt="Fencing match" tabindex="0" onclick="showPhoto('photo6')" onerror="handleError(this)">
+    </div>
+    <button onclick="undoPhoto()">Undo</button>
+    <script>
+        const originalPhotos = {
+            photo1: "file:///C:/Users/windos%2010/Desktop/photogallery/fencer-s-victory-cheer-stockcake.webp",
+            photo2: "file:///C:/Users/windos%2010/Desktop/photogallery/fencing-on-stage-u9ykbnkdeb5vkclq.jpg",
+            photo3: "file:///C:/Users/windos%2010/Desktop/photogallery/istockphoto-172226343-612x612.jpg",
+            photo4: "file:///C:/Users/windos%2010/Desktop/photogallery/istockphoto-1153729351-612x612.jpg",
+            photo5: "file:///C:/Users/windos%2010/Desktop/photogallery/pojedynek.jpg",
+            photo6: "file:///C:/Users/windos%2010/Desktop/photogallery/two-men-wearing-fencing-suit-practicing-with-sword-against-gray_155003-6296.avif"
+        };
+
+        function initializeGallery() {
+            console.log("Gallery initialized");
+
+            const photos = document.querySelectorAll('.photo');
+            photos.forEach(photo => {
+                photo.addEventListener('mouseover', () => {
+                    photo.style.borderColor = 'blue';
+                });
+
+                photo.addEventListener('mouseleave', () => {
+                    photo.style.borderColor = '#ccc';
+                });
+
+                photo.addEventListener('focus', () => {
+                    photo.style.borderColor = 'green';
+                });
+
+                photo.addEventListener('blur', () => {
+                    photo.style.borderColor = '#ccc';
+                });
+            });
+        }
+
+        function showPhoto(photoId) {
+            const photoUrl = originalPhotos[photoId];
+            const largeDisplay = document.getElementById('large-display');
+            largeDisplay.style.backgroundImage = `url('${photoUrl}')`;
+            largeDisplay.setAttribute('aria-label', `Displaying ${photoId}`);
+            console.log(`Photo ${photoId} displayed`);
+        }
+
+        function undoPhoto() {
+            const largeDisplay = document.getElementById('large-display');
+            largeDisplay.style.backgroundImage = "";
+            largeDisplay.setAttribute('aria-label', "Large photo display area.");
+            console.log("Display cleared");
+        }
+
+        // Handle image loading error (fallback image or message)
+        function handleError(image) {
+            image.onerror = null;
+            image.src = "file:///C:/Users/windos%2010/Desktop/photogallery/fallback-image.jpg"; // Add a fallback image
+            alert("An error occurred loading the image. A fallback image is displayed.");
+        }
+
+        // Keyboard navigation: left/right arrows to navigate through images
+        document.addEventListener('keydown', function(event) {
+            const currentPhoto = document.querySelector('.photo:focus');
+            if (!currentPhoto) return;
+
+            const photos = Array.from(document.querySelectorAll('.photo'));
+            const currentIndex = photos.indexOf(currentPhoto);
+
+            if (event.key === 'ArrowRight') {
+                // Show the next photo
+                const nextIndex = (currentIndex + 1) % photos.length;
+                photos[nextIndex].focus();
+                showPhoto(photos[nextIndex].id);
+            }
+
+            if (event.key === 'ArrowLeft') {
+                // Show the previous photo
+                const prevIndex = (currentIndex - 1 + photos.length) % photos.length;
+                photos[prevIndex].focus();
+                showPhoto(photos[prevIndex].id);
+            }
+        });
+    </script>
+</body>
+</html>
